@@ -5,6 +5,24 @@ branding:
   icon: "code"
   color: "blue"
 
+inputs:
+  branch:
+    description: "The branch where the web app will be deployed."
+    required: false
+    default: "gh-pages"
+  href:
+    description: "The base href for the Flutter web application."
+    required: false
+    default: "/"
+  name:
+    description: "The name for Git commits."
+    required: false
+    default: "${{github.actor}}"
+  email:
+    description: "The email address for Git commits."
+    required: false
+    default: "${{github.actor}}@users.noreply.github.com"
+
 runs:
   using: "composite"
   steps:
