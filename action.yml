@@ -1,0 +1,21 @@
+name: "Flutter Web App Deployment"
+description: "Deploys the Flutter web application to GitHub pages."
+
+branding:
+  icon: "code"
+  color: "blue"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Configure Flutter for web
+      shell: bash
+      run: |
+        flutter config --enable-web
+        flutter create --platforms=web .
+
+    - name: Build the Flutter web application
+      shell: bash
+      run: |
+        flutter pub get
+        flutter build web
