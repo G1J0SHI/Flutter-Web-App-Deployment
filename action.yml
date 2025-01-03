@@ -36,4 +36,24 @@ runs:
       shell: bash
       run: |
         flutter pub get
-        flutter build web
+        flutter build web --release --base-href "${{inputs.href}}"
+
+    - name: Configure Git
+      shell: bash
+      run: |
+        git config --global user.name "${{inputs.name}}"
+        git config --global user.email "${{inputs.email}}"
+        git config --global --add safe.directory /github/workspace
+
+    - name: Prepare the deployment branch
+      shell: bash
+      run: |
+        git checkout -B "${{inputs.branch}}"
+        git push origin "${{inputs.branch}}" -f
+
+    - name: Deploy to GitHub pages
+      shell: bash
+      run: |
+        git add build/web/ -f
+        git commit -m "Deploy Flutter Web Application"
+        git push origin $(git subtree split --prefix=build/web/):${{inputs.branch}} -f
