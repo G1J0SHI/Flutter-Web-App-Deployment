@@ -1,59 +1,62 @@
 name: "Flutter Web App Deployment"
 description: "Deploys the Flutter web application to GitHub pages."
+author: "G1Joshi"
 
 branding:
   icon: "code"
   color: "blue"
 
 inputs:
-  branch:
-    description: "The branch where the web app will be deployed."
+  working-directory:
+    description: "Working directory for Flutter commands"
     required: false
-    default: "gh-pages"
-  href:
-    description: "The base href for the Flutter web application."
-    required: false
-    default: "/"
-  name:
-    description: "The name for Git commits."
-    required: false
-    default: "${{github.actor}}"
-  email:
-    description: "The email address for Git commits."
-    required: false
-    default: "${{github.actor}}@users.noreply.github.com"
+    default: "."
+
+outputs:
+  page-url:
+    description: "URL of the deployed GitHub Pages site"
+    value: ${{ steps.deployment.outputs.page_url }}
 
 runs:
   using: "composite"
   steps:
-    - name: Configure Flutter for web
+    - name: Checkout Code
+      uses: actions/checkout@v5
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+
+    - name: Setup Pages
+      id: pages
+      uses: actions/configure-pages@v5
+
+    - name: Configure Flutter for Web
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         flutter config --enable-web
         flutter create --platforms=web .
 
-    - name: Build the Flutter web application
+    - name: Install Dependencies
       shell: bash
-      run: |
-        flutter pub get
-        flutter build web --release --base-href "${{inputs.href}}"
+      working-directory: ${{ inputs.working-directory }}
+      run: flutter pub get
 
-    - name: Configure Git
+    - name: Run Tests
       shell: bash
-      run: |
-        git config --global user.name "${{inputs.name}}"
-        git config --global user.email "${{inputs.email}}"
-        git config --global --add safe.directory /github/workspace
+      working-directory: ${{ inputs.working-directory }}
+      run: flutter test
 
-    - name: Prepare the deployment branch
+    - name: Build Web App
       shell: bash
-      run: |
-        git checkout -B "${{inputs.branch}}"
-        git push origin "${{inputs.branch}}" -f
+      working-directory: ${{ inputs.working-directory }}
+      run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
 
-    - name: Deploy to GitHub pages
-      shell: bash
-      run: |
-        git add build/web/ -f
-        git commit -m "Deploy Flutter Web Application"
-        git push origin $(git subtree split --prefix=build/web/):${{inputs.branch}} -f
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v4
+      with:
+        path: ${{ inputs.working-directory }}/build/web
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
