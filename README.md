@@ -12,21 +12,37 @@ name: "Flutter Web App Deployment"
 on: [push]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.cicd.outputs.page-url }}
     steps:
-      - uses: actions/checkout@main
-      - uses: subosito/flutter-action@main
       - uses: g1j0shi/flutter-web-app-deployment@main
+        id: cicd
 ```
 
 #### Input
 
+| Name              | Description                            | Required | Default |
+| ----------------- | -------------------------------------- | -------- | ------- |
+| working-directory | Working directory for Flutter commands | false    | .       |
+
+#### Output
+
+| Name     | Description                           |
+| -------- | ------------------------------------- |
+| page-url | URL of the deployed GitHub Pages site |
+
+#### Example
+
 ```yml
       ...
       - uses: g1j0shi/flutter-web-app-deployment@main
+        id: cicd
         with:
-          branch: "gh-pages" # The branch where the web app will be deployed.
-          href: "/" # The base href for the Flutter web application.
+          working-directory: "./awesome_app"
 ```
