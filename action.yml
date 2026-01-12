@@ -11,6 +11,14 @@ inputs:
     description: "Working directory for Flutter commands"
     required: false
     default: "."
+  run-tests:
+    description: "Whether to run tests before building"
+    required: false
+    default: "true"
+  build-target:
+    description: "Target file for Flutter build"
+    required: false
+    default: "lib/main.dart"
 
 outputs:
   page-url:
@@ -21,7 +29,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout Code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -30,19 +38,13 @@ runs:
       id: pages
       uses: actions/configure-pages@v5
 
-    - name: Configure Flutter for Web
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: |
-        flutter config --enable-web
-        flutter create --platforms=web .
-
     - name: Install Dependencies
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: flutter pub get
 
     - name: Run Tests
+      if: ${{ inputs.run-tests == 'true' }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: flutter test
@@ -50,7 +52,7 @@ runs:
     - name: Build Web App
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
+      run: flutter build web --wasm --base-href "${{ steps.pages.outputs.base_path }}/" --target "${{ inputs.build-target }}"
 
     - name: Upload Artifact
       uses: actions/upload-pages-artifact@v4
