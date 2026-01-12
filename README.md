@@ -4,6 +4,14 @@
 
 ### Deploys the Flutter web application to GitHub pages.
 
+#### Setup
+
+Before using this action, enable GitHub Pages in your repository:
+
+1. Go to your repository **Settings**
+2. Navigate to **Pages** in the left sidebar
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**
+
 #### Usage
 
 ```yml
@@ -27,9 +35,11 @@ jobs:
 
 #### Input
 
-| Name              | Description                            | Required | Default |
-| ----------------- | -------------------------------------- | -------- | ------- |
-| working-directory | Working directory for Flutter commands | false    | .       |
+| Name              | Description                            | Required | Default       |
+| ----------------- | -------------------------------------- | -------- | ------------- |
+| working-directory | Working directory for Flutter commands | false    | .             |
+| run-tests         | Whether to run tests before building   | false    | true          |
+| build-target      | Target file for Flutter build          | false    | lib/main.dart |
 
 #### Output
 
@@ -45,4 +55,6 @@ jobs:
         id: cicd
         with:
           working-directory: "./awesome_app"
+          run-tests: false
+          build-target: "./lib/app/main.dart"
 ```
